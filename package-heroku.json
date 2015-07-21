@@ -1,0 +1,9 @@
+{
+  "name": "service-calendar",
+  "version": "1.0.0",
+  "devDependencies": {
+    "ical.js": "^1.1.2",
+    "request": "^2.59.0",
+    "moment": "^2.10.3"
+  }
+}
