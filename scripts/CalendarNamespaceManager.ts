@@ -3,6 +3,7 @@
  */
 
 /// <reference path="../t6s-core/core-backend/scripts/server/SourceNamespaceManager.ts" />
+/// <reference path="./sources/NextEvents.ts" />
 
 class CalendarNamespaceManager extends SourceNamespaceManager {
 
@@ -15,6 +16,6 @@ class CalendarNamespaceManager extends SourceNamespaceManager {
 	constructor(socket : any) {
 		super(socket);
 
-		this.addListenerToSocket("NextXHoursEvents", NextXHoursEvents.apply);
+		this.addListenerToSocket("NextEvents", function (params, calendarNamespaceManager) { new NextEvents(params, calendarNamespaceManager); });
 	}
 }
