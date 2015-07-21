@@ -2,5 +2,6 @@
   "name": "service-calendar",
   "version": "1.0.0",
   "devDependencies": {
+    "ical.js": "^1.1.2"
   }
 }
