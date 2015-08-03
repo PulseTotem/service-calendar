@@ -5,6 +5,7 @@
 /// <reference path="../../t6s-core/core-backend/scripts/server/SourceItf.ts" />
 /// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventCal.ts" />
 /// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventList.ts" />
+/// <reference path="../CalendarNamespaceManager.ts" />
 
 var ICAL : any = require("ical.js");
 var request : any = require("request");
