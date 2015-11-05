@@ -5,12 +5,12 @@
 /// <reference path="../../t6s-core/core-backend/t6s-core/core/libsdef/mocha.d.ts" />
 /// <reference path="../../t6s-core/core-backend/libsdef/sinon.d.ts" />
 
-/// <reference path="../../scripts/sources/NextEvents.ts" />
+/// <reference path="../../scripts/sources/CurrentEvents.ts" />
 
 var assert = require("assert");
 var sinon : SinonStatic = require("sinon");
 
-describe('NextEvent', function() {
+describe('CurrentEvents', function() {
 	var sandbox;
 	beforeEach(function () {
 		sandbox = sinon.sandbox.create();
@@ -28,7 +28,7 @@ describe('NextEvent', function() {
 			var params = { URL: 'Toto', InfoDuration: '10'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
-			new NextEvents(params, stubNSManager);
+			new CurrentEvents(params, stubNSManager);
 			mockAlbum.verify();
 		});
 
@@ -39,7 +39,7 @@ describe('NextEvent', function() {
 			var params = { Limit: '12', InfoDuration: '10'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
-			new NextEvents(params, stubNSManager);
+			new CurrentEvents(params, stubNSManager);
 			mockAlbum.verify();
 		});
 
@@ -50,7 +50,7 @@ describe('NextEvent', function() {
 			var params = { URL: 'Toto', Limit: '10'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
-			new NextEvents(params, stubNSManager);
+			new CurrentEvents(params, stubNSManager);
 			mockAlbum.verify();
 		});
 	});

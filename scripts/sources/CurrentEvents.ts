@@ -38,6 +38,7 @@ class CurrentEvents extends SourceItf {
 
 				var retrievedEvents = 0;
 				var limit = parseInt(self.getParams().Limit);
+				var infoDuration = parseInt(self.getParams().InfoDuration);
 				var limitNotReached = true;
 
 				for (var i = 0; i < vevents.length && limitNotReached; i++) {
@@ -49,7 +50,7 @@ class CurrentEvents extends SourceItf {
 
 					if (now.isBefore(endDate) && now.isAfter(startDate)) {
 						var eventCal = ICalParsing.createEventCalFromVEvent(currentEvent);
-						eventCal.setDurationToDisplay(self.getParams().InfoDuration);
+						eventCal.setDurationToDisplay(infoDuration);
 						eventList.addEvent(eventCal);
 
 						retrievedEvents++;
@@ -60,7 +61,7 @@ class CurrentEvents extends SourceItf {
 					}
 				}
 
-				eventList.setDurationToDisplay(self.getParams().InfoDuration * retrievedEvents);
+				eventList.setDurationToDisplay(infoDuration * retrievedEvents);
 				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
 			}

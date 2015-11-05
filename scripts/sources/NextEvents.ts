@@ -50,6 +50,7 @@ class NextEvents extends SourceItf {
 
 				var retrievedEvents = 0;
 				var limit = parseInt(self.getParams().Limit);
+				var infoDuration = parseInt(self.getParams().InfoDuration);
 				var limitNotReached = true;
 
 				for (var i = 0; i < vevents.length && limitNotReached; i++) {
@@ -60,7 +61,7 @@ class NextEvents extends SourceItf {
 
 					if (now.isBefore(endDate)) {
 						var eventCal = ICalParsing.createEventCalFromVEvent(currentEvent);
-						eventCal.setDurationToDisplay(self.getParams().InfoDuration);
+						eventCal.setDurationToDisplay(infoDuration);
 						eventList.addEvent(eventCal);
 
 						retrievedEvents++;
@@ -71,7 +72,7 @@ class NextEvents extends SourceItf {
 					}
 				}
 
-				eventList.setDurationToDisplay(self.getParams().InfoDuration * retrievedEvents);
+				eventList.setDurationToDisplay(infoDuration * retrievedEvents);
 				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
 			}
