@@ -9,7 +9,11 @@
 
 /**
  * Get the current events from an ICS Calendar.
- * Parameters are URL of the ICS Calendar, Limit of the numer of events to retrieve (0 = no limit), the InfoDuration for each information
+ * Parameters are :
+ * - URL of the ICS Calendar,
+ * - Limit of the numer of events to retrieve (0 = no limit),
+ * - InfoDuration for each information
+ * - Name of the calendar
  *
  * @class CurrentEvents
  */
@@ -21,7 +25,7 @@ class CurrentEvents extends SourceItf {
 		Logger.debug("Call next events with params :");
 		Logger.debug(params);
 
-		if (this.checkParams(["Limit", "InfoDuration", "URL"])) {
+		if (this.checkParams(["Limit", "InfoDuration", "URL", "Name"])) {
 			this.run();
 		}
 	}

@@ -25,7 +25,7 @@ describe('CurrentEvents', function() {
 			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { URL: 'Toto', InfoDuration: '10'};
+			var params = { URL: 'Toto', InfoDuration: '10', Name: 'bidule'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new CurrentEvents(params, stubNSManager);
@@ -36,7 +36,7 @@ describe('CurrentEvents', function() {
 			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { Limit: '12', InfoDuration: '10'};
+			var params = { Limit: '12', InfoDuration: '10', Name: 'bidule'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new CurrentEvents(params, stubNSManager);
@@ -47,7 +47,18 @@ describe('CurrentEvents', function() {
 			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { URL: 'Toto', Limit: '10'};
+			var params = { URL: 'Toto', Limit: '10', Name: 'bidule'};
+
+			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
+			new CurrentEvents(params, stubNSManager);
+			mockAlbum.verify();
+		});
+
+		it('should not launch run if the parameter Name is missing', function () {
+			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
+			mockAlbum.expects('run').never();
+
+			var params = { URL: 'Toto', Limit: '10', InfoDuration: '20'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new CurrentEvents(params, stubNSManager);
