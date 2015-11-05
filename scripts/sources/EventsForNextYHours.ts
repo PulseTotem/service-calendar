@@ -57,8 +57,9 @@ class EventsForNextYHours extends SourceItf {
 				var timeWindow = parseInt(self.getParams().TimeWindow);
 				var limitNotReached = true;
 				var now : any = moment();
+				var futureNow : any = moment();
 
-				var futureNow = now.add(timeWindow, "hours");
+				futureNow.add(timeWindow, "hours");
 
 				for (var i = 0; i < vevents.length && limitNotReached; i++) {
 					var currentEvent = vevents[i];
