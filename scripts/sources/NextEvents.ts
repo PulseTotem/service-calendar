@@ -6,6 +6,7 @@
 /// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventCal.ts" />
 /// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventList.ts" />
 /// <reference path="../CalendarNamespaceManager.ts" />
+/// <reference path="../core/ICalParsing.ts" />
 
 var ICAL : any = require("ical.js");
 var request : any = require("request");
@@ -29,7 +30,9 @@ class NextEvents extends SourceItf {
 		Logger.debug("Call next events with params :");
 		Logger.debug(params);
 
-		this.run();
+		if (this.checkParams(["Limit", "InfoDuration", "URL"])) {
+			this.run();
+		}
 	}
 
 	public run() {

@@ -22,7 +22,7 @@ describe('CurrentEvents', function() {
 
 	describe('#constructor', function () {
 		it('should not launch run if the parameter Limit is missing', function () {
-			var mockAlbum = sandbox.mock(NextEvents.prototype);
+			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
 			mockAlbum.expects('run').never();
 
 			var params = { URL: 'Toto', InfoDuration: '10'};
@@ -33,7 +33,7 @@ describe('CurrentEvents', function() {
 		});
 
 		it('should not launch run if the parameter URL is missing', function () {
-			var mockAlbum = sandbox.mock(NextEvents.prototype);
+			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
 			mockAlbum.expects('run').never();
 
 			var params = { Limit: '12', InfoDuration: '10'};
@@ -44,7 +44,7 @@ describe('CurrentEvents', function() {
 		});
 
 		it('should not launch run if the parameter InfoDuration is missing', function () {
-			var mockAlbum = sandbox.mock(NextEvents.prototype);
+			var mockAlbum = sandbox.mock(CurrentEvents.prototype);
 			mockAlbum.expects('run').never();
 
 			var params = { URL: 'Toto', Limit: '10'};

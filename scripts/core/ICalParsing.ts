@@ -1,6 +1,8 @@
 /**
  * @author Simon Urli <simon@the6thscreen.fr>
  */
+/// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventCal.ts" />
+
 
 /**
  * Utility class to parse and manipulate an ICal and return proper Event information for different sources
