@@ -1,27 +1,15 @@
 /**
  * @author Simon Urli <simon@the6thscreen.fr>
  */
-
-/// <reference path="../../t6s-core/core-backend/scripts/server/SourceItf.ts" />
-/// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventCal.ts" />
-/// <reference path="../../t6s-core/core-backend/t6s-core/core/scripts/infotype/EventList.ts" />
-/// <reference path="../CalendarNamespaceManager.ts" />
-
-var ICAL : any = require("ical.js");
-var request : any = require("request");
-var moment : any = require("moment");
+/// <reference path="../core/ICalParsing.ts" />
 
 /**
- * Define a source which retrieves the event of a calendar which are coming until the limit is full.
- * This source takes those following parameters :
- *     - URL (string) : the URL of the iCalendar to parse (ICAL format)
- *     - Limit (integer) : the number of events to retrieve
- *     - InfoDuration (integer) : the duration of each information
- *     - Name (string) : Describe the current calendar
+ * Get the current events from an ICS Calendar.
+ * Parameters are URL of the ICS Calendar, Limit of the numer of events to retrieve (0 = no limit), the InfoDuration for each information
  *
- * @class NextEvents
+ * @class CurrentEvents
  */
-class NextEvents extends SourceItf {
+class CurrentEvents extends SourceItf {
 
 	constructor(params : any, calendarNamespaceManager : CalendarNamespaceManager) {
 		super(params, calendarNamespaceManager);
@@ -56,9 +44,10 @@ class NextEvents extends SourceItf {
 					var currentEvent = vevents[i];
 
 					var endDate : any = ICalParsing.getEndDateFromVEvent(currentEvent);
+					var startDate : any = ICalParsing.getStartDateFromVEvent(currentEvent);
 					var now : any = moment();
 
-					if (now.isBefore(endDate)) {
+					if (now.isBefore(endDate) && now.isAfter(startDate)) {
 						var eventCal = ICalParsing.createEventCalFromVEvent(currentEvent);
 						eventCal.setDurationToDisplay(self.getParams().InfoDuration);
 						eventList.addEvent(eventCal);
