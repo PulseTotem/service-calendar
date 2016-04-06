@@ -13,6 +13,19 @@ describe('ICalParsing', function() {
 
     var agendaContent;
 
+    var searchVeventById = function (id) {
+        var allEvents = ICalParsing.getAllVEvents(agendaContent);
+
+        for (var i = 0; i < allEvents.length; i++) {
+            var vevent = allEvents[i];
+            var event =  new ICAL.Event(vevent);
+            if (event.uid == id) {
+                return vevent;
+            }
+        }
+        return null;
+    };
+
     before(function () {
         agendaContent = fs.readFileSync("./tests-resources/Agenda-test.ics",{encoding: 'utf-8'});
     });
@@ -23,8 +36,6 @@ describe('ICalParsing', function() {
 
             assert.equal(datas.length, 7);
         });
-
-
     });
 
     describe('createEventCalFromVEvent', function () {
@@ -42,19 +53,32 @@ describe('ICalParsing', function() {
             expectedEvent.setEnd(endDate.toDate());
             expectedEvent.setObsoleteDate(endDate.toDate());
 
-            var allEvents = ICalParsing.getAllVEvents(agendaContent);
-
-            var consideredVEvent = null;
-            for (var i = 0; i < allEvents.length; i++) {
-                var vevent = allEvents[i];
-                var event =  new ICAL.Event(vevent);
-                if (event.uid == idEvent) {
-                    consideredVEvent = vevent;
-                }
-            }
+            var consideredVEvent = searchVeventById(idEvent);
 
             var computedEvent = ICalParsing.createEventCalFromVEvent(consideredVEvent);
             assert.deepEqual(computedEvent, expectedEvent);
-        })
+        });
+    });
+
+    describe('getStartDateFromVEvent', function () {
+        it('should return a moment object corresponding to the date of the given vevent', function () {
+            var idEvent = "jk59ph9kalsc9q5rn0b6gvun28@google.com";
+
+            var vevent = searchVeventById(idEvent);
+
+            var expectedMoment = moment("20160628193000","YYYYMMDDHHmmss");
+            assert.equal(ICalParsing.getStartDateFromVEvent(vevent).unix(), expectedMoment.unix());
+        });
+    });
+
+    describe('getEndDateFromVEvent', function () {
+        it('should return a moment object corresponding to the date of the given vevent', function () {
+            var idEvent = "jk59ph9kalsc9q5rn0b6gvun28@google.com";
+
+            var vevent = searchVeventById(idEvent);
+
+            var expectedMoment = moment("20160629030000","YYYYMMDDHHmmss");
+            assert.deepEqual(ICalParsing.getEndDateFromVEvent(vevent).unix(), expectedMoment.unix());
+        });
     })
 });
