@@ -62,11 +62,20 @@ describe('ICalParsing', function() {
 
     describe('getStartDateFromVEvent', function () {
         it('should return a moment object corresponding to the date of the given vevent', function () {
-            var idEvent = "jk59ph9kalsc9q5rn0b6gvun28@google.com";
+            var idEvent = "jk59ph9kalsc9q5rn0b6gvun28@google.com"; // Fiesta @Lille
 
             var vevent = searchVeventById(idEvent);
 
             var expectedMoment = moment("20160628193000","YYYYMMDDHHmmss");
+            assert.equal(ICalParsing.getStartDateFromVEvent(vevent).unix(), expectedMoment.unix());
+        });
+
+        it('should return a moment object corresponding to the date of the first event in case of recurring vevent', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+
+            var vevent = searchVeventById(idEvent);
+
+            var expectedMoment = moment("20160627180000","YYYYMMDDHHmmss");
             assert.equal(ICalParsing.getStartDateFromVEvent(vevent).unix(), expectedMoment.unix());
         });
     });
@@ -80,5 +89,16 @@ describe('ICalParsing', function() {
             var expectedMoment = moment("20160629030000","YYYYMMDDHHmmss");
             assert.deepEqual(ICalParsing.getEndDateFromVEvent(vevent).unix(), expectedMoment.unix());
         });
+
+        it('should return a moment object corresponding to the date of the first event in case of recurring vevent', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+
+            var vevent = searchVeventById(idEvent);
+
+            var expectedMoment = moment("20160627200000","YYYYMMDDHHmmss");
+            assert.equal(ICalParsing.getEndDateFromVEvent(vevent).unix(), expectedMoment.unix());
+        });
     })
+
+
 });
