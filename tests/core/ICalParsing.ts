@@ -98,6 +98,23 @@ describe('ICalParsing', function() {
             var expectedMoment = moment("20160627200000","YYYYMMDDHHmmss");
             assert.equal(ICalParsing.getEndDateFromVEvent(vevent).unix(), expectedMoment.unix());
         });
+    });
+
+    describe('getNextVEventOfARecurringEventAfterDate', function () {
+        it('should return the next occurence after the given time', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var givenTime = moment("20160629000000","YYYYMMDDHHmmss"); // 29/06/2016 00:00:00
+
+            var vevent = ICalParsing.getNextVEventOfARecurringEventAfterDate(recurringVevent, givenTime.toDate());
+
+            var expectedStartMoment = moment("20160629180000","YYYYMMDDHHmmss"); // 29/06/2016 18:00:00
+            var expectedEndMoment = moment("20160629200000","YYYYMMDDHHmmss"); // 29/06/2016 20:00:00
+
+            assert.deepEqual(vevent.startDate.toJSDate(), expectedStartMoment.toDate());
+            assert.deepEqual(vevent.endDate.toJSDate(), expectedEndMoment.toDate());
+        });
     })
 
 

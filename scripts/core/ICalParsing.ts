@@ -29,6 +29,27 @@ class ICalParsing {
 		return vevents;
 	}
 
+	public static getNextVEventOfARecurringEventAfterDate(reccuringVevent : any, date : any) : any {
+		var reccuringEvent = new ICAL.Event(reccuringVevent);
+		var recurExpansion : any = reccuringEvent.iterator();
+
+		var timeOccurence = recurExpansion.next();
+
+		while (moment(timeOccurence.toJSDate()).isBefore(date) && !recurExpansion.complete) {
+			timeOccurence = recurExpansion.next();
+		}
+
+		if (moment(timeOccurence.toJSDate()).isBefore(date)) {
+			return null;
+		} else {
+			var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
+			var event = occurenceDetails.item;
+			event.startDate = occurenceDetails.startDate;
+			event.endDate = occurenceDetails.endDate;
+			return event;
+		}
+	}
+
 	public static createEventCalFromVEvent(vevent : any) : EventCal {
 		var event : any = new ICAL.Event(vevent);
 
