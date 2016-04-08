@@ -121,6 +121,14 @@ describe('ICalParsing', function() {
             assert.deepEqual(eventCal.getEnd(), expectedEndMoment.toDate());
         });
 
+        it('should throws an exception if the given event is not reccuring', function () {
+           var idEvent = "pcnorj276h9pvngd0iiclmgjn0@google.com";
+
+            var falseReccurringVEvent = searchVeventById(idEvent);
+            var startTime = moment("29/06/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            assert.throws(() => {ICalParsing.getNextVEventsOfARecurringEventInARange(falseReccurringVEvent, startTime.toDate())}, Error);
+        });
+
         it('should return the occurence in the range (here 4 occurences)', function () {
             var idEvent = "4kniaf0minfuvqgo6fnh0b0t1s@google.com"; // Loyer
             var recurringVevent = searchVeventById(idEvent);
@@ -198,6 +206,15 @@ describe('ICalParsing', function() {
             assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of second occurence should be 02/11/2016 at noon");
             assert.equal(vevent.getName(), "Anniversaire Simon", "summary of the event should be 'Loyer'");
         });
+
+        it('should throws an error if used with a no limit reccuring events without an endDate', function () {
+            var idEvent = "l4ml42vrjpaoloigl2fvu45q74@google.com"; // Anniversaire Simon
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("15/05/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.throws(() => { ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate())}, Error);
+        })
     })
 
 
