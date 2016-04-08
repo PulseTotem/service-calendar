@@ -29,6 +29,15 @@ class ICalParsing {
 		return vevents;
 	}
 
+	/**
+	 * Return all occurences of a reccurring event in the range given by two dates.
+	 * This method throws error if the given event is not reccuring or if the recursion has not limit and no dateEnd is given.
+	 *
+	 * @param reccuringVevent An ICS event on the form of a ICAL.Component
+	 * @param dateStart The date to start the range as a JSDate
+	 * @param dateEnd The date to end the range as a JSDate. This argument is optionnal if the event has a limit of occurrences.
+	 * @returns {Array} An array of EventCal
+     */
 	public static getNextVEventsOfARecurringEventInARange(reccuringVevent : any, dateStart : any, dateEnd : any = null) : Array<EventCal> {
 		var reccuringEvent = new ICAL.Event(reccuringVevent);
 		if (!reccuringEvent.isRecurring()) {
@@ -36,40 +45,48 @@ class ICalParsing {
 		}
 
 		var rrule = reccuringVevent.getFirstProperty('rrule');
-		var count = rrule.getParameter('count');
+		var count = rrule.getFirstValue().count;
 
 		if (count == null && dateEnd == null) {
 			throw new Error("Your reccurring event has not count limit: you must give a dateEnd.");
 		}
 
+		if (dateEnd != null && moment(dateStart).isAfter(dateEnd)) {
+			throw new Error("The given dateStart argument is after dateEnd : "+dateStart+ " > "+dateEnd);
+		}
+
 		var recurExpansion : any = reccuringEvent.iterator();
 
 		var results = [];
-		var timeOccurence = recurExpansion.next();
-		var event = null;
+		var timeOccurence;
 		var occNumber = 0;
+		var momentTimeOcc;
+
 		while (!recurExpansion.complete) {
-			var momentTimeOcc = moment(timeOccurence.toJSDate());
-
-			if (momentTimeOcc.isAfter(dateStart)) {
-				if (dateEnd == null || momentTimeOcc.isBefore(dateEnd)) {
-					var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
-
-					var uid = reccuringEvent.uid+"_"+occNumber;
-					var eventCal : EventCal = new EventCal(uid);
-					eventCal.setName(reccuringEvent.summary);
-					eventCal.setDescription(reccuringEvent.description);
-					eventCal.setLocation(reccuringEvent.location);
-					eventCal.setStart(occurenceDetails.startDate.toJSDate());
-					eventCal.setEnd(occurenceDetails.endDate.toJSDate());
-					results.push(eventCal);
-				} else if (dateEnd !== null && momentTimeOcc.isAfter(dateEnd)) {
-					break;
-				}
-			}
 
 			timeOccurence = recurExpansion.next();
-			occNumber++;
+			if (timeOccurence != null) {
+				momentTimeOcc = moment(timeOccurence.toJSDate());
+
+				if (momentTimeOcc.isAfter(dateStart)) {
+					if (dateEnd == null || momentTimeOcc.isBefore(dateEnd)) {
+						var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
+
+						var uid = reccuringEvent.uid+"_"+occNumber;
+						var eventCal : EventCal = new EventCal(uid);
+						eventCal.setName(reccuringEvent.summary);
+						eventCal.setDescription(reccuringEvent.description);
+						eventCal.setLocation(reccuringEvent.location);
+						eventCal.setStart(occurenceDetails.startDate.toJSDate());
+						eventCal.setEnd(occurenceDetails.endDate.toJSDate());
+						results.push(eventCal);
+					} else if (dateEnd !== null && momentTimeOcc.isAfter(dateEnd)) {
+						break;
+					}
+				}
+
+				occNumber++;
+			}
 		}
 
 		return results;

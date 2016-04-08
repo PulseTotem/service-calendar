@@ -214,7 +214,40 @@ describe('ICalParsing', function() {
             var startTime = moment("15/05/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
 
             assert.throws(() => { ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate())}, Error);
-        })
+        });
+
+        it('should return an empty array if the begin date is after the last occurence', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("29/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate());
+
+            assert.equal(icalEvents.length, 0);
+        });
+
+        it('should return an empty array if there is no occurence in the given range', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("29/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/10/2016 01:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+
+            assert.equal(icalEvents.length, 0);
+        });
+
+        it('should throws an exception if endDate is before startDate', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var endTime = moment("29/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            var startTime = moment("29/10/2016 01:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.throws(() => { ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate())}, Error);
+        });
     })
 
 
