@@ -29,25 +29,39 @@ class ICalParsing {
 		return vevents;
 	}
 
-	public static getNextVEventOfARecurringEventAfterDate(reccuringVevent : any, date : any) : any {
+	public static getNextVEventsOfARecurringEventInARange(reccuringVevent : any, dateStart : any, dateEnd : any = null) : Array<EventCal> {
 		var reccuringEvent = new ICAL.Event(reccuringVevent);
 		var recurExpansion : any = reccuringEvent.iterator();
 
+		var results = [];
 		var timeOccurence = recurExpansion.next();
+		var event = null;
+		var occNumber = 0;
+		while (!recurExpansion.complete) {
+			var momentTimeOcc = moment(timeOccurence.toJSDate());
 
-		while (moment(timeOccurence.toJSDate()).isBefore(date) && !recurExpansion.complete) {
+			if (momentTimeOcc.isAfter(dateStart)) {
+				if (dateEnd == null || momentTimeOcc.isBefore(dateEnd)) {
+					var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
+
+					var uid = reccuringEvent.uid+"_"+occNumber;
+					var eventCal : EventCal = new EventCal(uid);
+					eventCal.setName(reccuringEvent.summary);
+					eventCal.setDescription(reccuringEvent.description);
+					eventCal.setLocation(reccuringEvent.location);
+					eventCal.setStart(occurenceDetails.startDate.toJSDate());
+					eventCal.setEnd(occurenceDetails.endDate.toJSDate());
+					results.push(eventCal);
+				} else if (dateEnd !== null && momentTimeOcc.isAfter(dateEnd)) {
+					break;
+				}
+			}
+
 			timeOccurence = recurExpansion.next();
+			occNumber++;
 		}
 
-		if (moment(timeOccurence.toJSDate()).isBefore(date)) {
-			return null;
-		} else {
-			var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
-			var event = occurenceDetails.item;
-			event.startDate = occurenceDetails.startDate;
-			event.endDate = occurenceDetails.endDate;
-			return event;
-		}
+		return results;
 	}
 
 	public static createEventCalFromVEvent(vevent : any) : EventCal {

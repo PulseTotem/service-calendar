@@ -86,7 +86,7 @@ describe('ICalParsing', function() {
 
             var vevent = searchVeventById(idEvent);
 
-            var expectedMoment = moment("20160629030000","YYYYMMDDHHmmss");
+            var expectedMoment = moment("29/06/2016 03:00:00","DD/MM/YYYY HH:mm:ss");
             assert.deepEqual(ICalParsing.getEndDateFromVEvent(vevent).unix(), expectedMoment.unix());
         });
 
@@ -95,25 +95,108 @@ describe('ICalParsing', function() {
 
             var vevent = searchVeventById(idEvent);
 
-            var expectedMoment = moment("20160627200000","YYYYMMDDHHmmss");
+            var expectedMoment = moment("27/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss");
             assert.equal(ICalParsing.getEndDateFromVEvent(vevent).unix(), expectedMoment.unix());
         });
     });
 
-    describe('getNextVEventOfARecurringEventAfterDate', function () {
-        it('should return the next occurence after the given time', function () {
+    describe('getNextVEventsOfARecurringEventInARange', function () {
+        it('should return the occurence in the range (here only 1 occurence)', function () {
             var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
             var recurringVevent = searchVeventById(idEvent);
 
-            var givenTime = moment("20160629000000","YYYYMMDDHHmmss"); // 29/06/2016 00:00:00
+            var startTime = moment("29/06/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("30/06/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
 
-            var vevent = ICalParsing.getNextVEventOfARecurringEventAfterDate(recurringVevent, givenTime.toDate());
+            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
 
-            var expectedStartMoment = moment("20160629180000","YYYYMMDDHHmmss"); // 29/06/2016 18:00:00
-            var expectedEndMoment = moment("20160629200000","YYYYMMDDHHmmss"); // 29/06/2016 20:00:00
+            assert.equal(icalEvents.length, 1);
 
-            assert.deepEqual(vevent.startDate.toJSDate(), expectedStartMoment.toDate());
-            assert.deepEqual(vevent.endDate.toJSDate(), expectedEndMoment.toDate());
+            var eventCal = icalEvents[0];
+
+            var expectedStartMoment = moment("29/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 18:00:00
+            var expectedEndMoment = moment("29/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 20:00:00
+
+            assert.deepEqual(eventCal.getStart(), expectedStartMoment.toDate());
+            assert.deepEqual(eventCal.getEnd(), expectedEndMoment.toDate());
+        });
+
+        it('should return the occurence in the range (here 4 occurences)', function () {
+            var idEvent = "4kniaf0minfuvqgo6fnh0b0t1s@google.com"; // Loyer
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("15/09/2016 00:00:00","DD/MM/YYYY HH:mm:ss"); // 15/09/2016 00:00:00
+            var endTime = moment("04/01/2017 00:00:00","DD/MM/YYYY HH:mm:ss"); // 04/01/2017 00:00:00
+
+            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+
+            assert.equal(icalEvents.length, 4);
+
+            var vevent = icalEvents[0];
+
+            var expectedStartMoment = moment("01/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            var expectedEndMoment = moment("02/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.deepEqual(vevent.getStart(), expectedStartMoment.toDate(), "start date of first occurence should be 01/10/2016 at noon");
+            assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of first occurence should be 02/10/2016 at noon");
+            assert.equal(vevent.getName(), "Loyer", "summary of the event should be 'Loyer'");
+
+            vevent = icalEvents[1];
+
+            expectedStartMoment = moment("01/11/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            expectedEndMoment = moment("02/11/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.deepEqual(vevent.getStart(), expectedStartMoment.toDate(), "start date of second occurence should be 01/11/2016 at noon");
+            assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of second occurence should be 02/11/2016 at noon");
+            assert.equal(vevent.getName(), "Loyer", "summary of the event should be 'Loyer'");
+
+            vevent = icalEvents[2];
+
+            expectedStartMoment = moment("01/12/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            expectedEndMoment = moment("02/12/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.deepEqual(vevent.getStart(), expectedStartMoment.toDate(), "start date of third occurence should be 01/12/2016 at noon");
+            assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of third occurence should be 02/12/2016 at noon");
+            assert.equal(vevent.getName(), "Loyer", "summary of the event should be 'Loyer'");
+
+            vevent = icalEvents[3];
+
+            expectedStartMoment = moment("01/01/2017 00:00:00","DD/MM/YYYY HH:mm:ss");
+            expectedEndMoment = moment("02/01/2017 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.deepEqual(vevent.getStart(), expectedStartMoment.toDate(), "start date of fourth occurence should be 01/01/2017 at noon");
+            assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of fourth occurence should be 02/01/2016 at noon");
+            assert.equal(vevent.getName(), "Loyer", "summary of the event should be 'Loyer'");
+        });
+
+        it('should return the occurences (here 2 occurences) in the range with no limit recurring events', function () {
+            var idEvent = "l4ml42vrjpaoloigl2fvu45q74@google.com"; // Anniversaire Simon
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("15/05/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("04/09/2017 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+
+            assert.equal(icalEvents.length, 2);
+
+            var vevent = icalEvents[0];
+
+            var expectedStartMoment = moment("04/07/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+            var expectedEndMoment = moment("05/07/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.deepEqual(vevent.getStart(), expectedStartMoment.toDate(), "start date of first occurence should be 01/10/2016 at noon");
+            assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of first occurence should be 02/10/2016 at noon");
+            assert.equal(vevent.getName(), "Anniversaire Simon", "summary of the event should be 'Loyer'");
+
+            vevent = icalEvents[1];
+
+            expectedStartMoment = moment("04/07/2017 00:00:00","DD/MM/YYYY HH:mm:ss");
+            expectedEndMoment = moment("05/07/2017 00:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.deepEqual(vevent.getStart(), expectedStartMoment.toDate(), "start date of second occurence should be 01/11/2016 at noon");
+            assert.deepEqual(vevent.getEnd(), expectedEndMoment.toDate(), "end date of second occurence should be 02/11/2016 at noon");
+            assert.equal(vevent.getName(), "Anniversaire Simon", "summary of the event should be 'Loyer'");
         });
     })
 
