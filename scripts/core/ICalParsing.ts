@@ -31,6 +31,17 @@ class ICalParsing {
 
 	public static getNextVEventsOfARecurringEventInARange(reccuringVevent : any, dateStart : any, dateEnd : any = null) : Array<EventCal> {
 		var reccuringEvent = new ICAL.Event(reccuringVevent);
+		if (!reccuringEvent.isRecurring()) {
+			throw "The passing event is not reccuring."
+		}
+
+		var rrule = reccuringVevent.getFirstProperty('rrule');
+		var count = rrule.getParameter('count');
+
+		if (count == null && dateEnd == null) {
+			throw "Your reccurring event has not count limit: you must give a dateEnd.";
+		}
+
 		var recurExpansion : any = reccuringEvent.iterator();
 
 		var results = [];
