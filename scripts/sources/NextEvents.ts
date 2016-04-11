@@ -19,6 +19,7 @@ var moment : any = require("moment");
  *     - Limit (integer) : the number of events to retrieve
  *     - InfoDuration (integer) : the duration of each information
  *     - Name (string) : Describe the current calendar
+ *     - EndDate (date) : Describe the date maximum to pick datas
  *
  * @class NextEvents
  */
@@ -27,10 +28,7 @@ class NextEvents extends SourceItf {
 	constructor(params : any, calendarNamespaceManager : CalendarNamespaceManager) {
 		super(params, calendarNamespaceManager);
 
-		Logger.debug("Call next events with params :");
-		Logger.debug(params);
-
-		if (this.checkParams(["Limit", "InfoDuration", "URL", "Name"])) {
+		if (this.checkParams(["Limit", "InfoDuration", "URL", "Name", "EndDate"])) {
 			this.run();
 		}
 	}
@@ -46,36 +44,28 @@ class NextEvents extends SourceItf {
 				Logger.error("Status Code: "+response.statusCode);
 				Logger.error("Body: "+body);
 			} else {
-				var vevents = ICalParsing.getAllVEvents(body);
-
 				var eventList : EventList = new EventList(uuid.v1());
 				eventList.setName(self.getParams().Name);
 
-				var retrievedEvents = 0;
 				var limit = parseInt(self.getParams().Limit);
 				var infoDuration = parseInt(self.getParams().InfoDuration);
-				var limitNotReached = true;
 
-				for (var i = 0; i < vevents.length && limitNotReached; i++) {
-					var currentEvent = vevents[i];
+				var dateMax = moment(parseInt(self.getParams().EndDate));
+				var now = moment();
 
-					var endDate : any = ICalParsing.getEndDateFromVEvent(currentEvent);
-					var now : any = moment();
+				var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, now.toDate(), dateMax.toDate());
 
-					if (now.isBefore(endDate)) {
-						var eventCal = ICalParsing.createEventCalFromVEvent(currentEvent);
-						eventCal.setDurationToDisplay(infoDuration);
-						eventList.addEvent(eventCal);
-
-						retrievedEvents++;
-
-						if (retrievedEvents == limit) {
-							limitNotReached = false;
-						}
-					}
+				if (limit > events.length) {
+					limit = events.length;
 				}
 
-				eventList.setDurationToDisplay(infoDuration * retrievedEvents);
+				for (var i = 0; i < limit; i++) {
+					var event : EventCal = events[i];
+					event.setDurationToDisplay(infoDuration);
+
+					eventList.addEvent(event);
+				}
+				eventList.setDurationToDisplay(infoDuration * limit);
 				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
 			}
