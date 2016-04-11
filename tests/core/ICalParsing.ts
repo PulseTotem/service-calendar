@@ -100,7 +100,7 @@ describe('ICalParsing', function() {
         });
     });
 
-    describe('getNextVEventsOfARecurringEventInARange', function () {
+    describe('getEventsOfARecurringEventInARange', function () {
         it('should return the occurence in the range (here only 1 occurence)', function () {
             var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
             var recurringVevent = searchVeventById(idEvent);
@@ -108,7 +108,7 @@ describe('ICalParsing', function() {
             var startTime = moment("29/06/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
             var endTime = moment("30/06/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
 
-            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
 
             assert.equal(icalEvents.length, 1);
 
@@ -126,7 +126,7 @@ describe('ICalParsing', function() {
 
             var falseReccurringVEvent = searchVeventById(idEvent);
             var startTime = moment("29/06/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
-            assert.throws(() => {ICalParsing.getNextVEventsOfARecurringEventInARange(falseReccurringVEvent, startTime.toDate())}, Error);
+            assert.throws(() => {ICalParsing.getEventsOfARecurringEventInARange(falseReccurringVEvent, startTime.toDate())}, Error);
         });
 
         it('should return the occurence in the range (here 4 occurences)', function () {
@@ -136,7 +136,7 @@ describe('ICalParsing', function() {
             var startTime = moment("15/09/2016 00:00:00","DD/MM/YYYY HH:mm:ss"); // 15/09/2016 00:00:00
             var endTime = moment("04/01/2017 00:00:00","DD/MM/YYYY HH:mm:ss"); // 04/01/2017 00:00:00
 
-            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
 
             assert.equal(icalEvents.length, 4);
 
@@ -184,7 +184,7 @@ describe('ICalParsing', function() {
             var startTime = moment("15/05/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
             var endTime = moment("04/09/2017 00:00:00","DD/MM/YYYY HH:mm:ss");
 
-            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
 
             assert.equal(icalEvents.length, 2);
 
@@ -213,7 +213,7 @@ describe('ICalParsing', function() {
 
             var startTime = moment("15/05/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
 
-            assert.throws(() => { ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate())}, Error);
+            assert.throws(() => { ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate())}, Error);
         });
 
         it('should return an empty array if the begin date is after the last occurence', function () {
@@ -222,7 +222,7 @@ describe('ICalParsing', function() {
 
             var startTime = moment("29/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
 
-            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate());
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate());
 
             assert.equal(icalEvents.length, 0);
         });
@@ -234,7 +234,7 @@ describe('ICalParsing', function() {
             var startTime = moment("29/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
             var endTime = moment("29/10/2016 01:00:00","DD/MM/YYYY HH:mm:ss");
 
-            var icalEvents : Array<EventCal> = ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
 
             assert.equal(icalEvents.length, 0);
         });
@@ -246,9 +246,73 @@ describe('ICalParsing', function() {
             var endTime = moment("29/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss");
             var startTime = moment("29/10/2016 01:00:00","DD/MM/YYYY HH:mm:ss");
 
-            assert.throws(() => { ICalParsing.getNextVEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate())}, Error);
+            assert.throws(() => { ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate())}, Error);
         });
     })
 
+    describe('compare', function () {
+        it('should return 1 if the first event start after the second one', function () {
 
+            var event1start = moment("27/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var event1 = new EventCal();
+            event1.setName("toto");
+            event1.setDescription("toto");
+            event1.setStart(event1start.toDate());
+            event1.setEnd(event1start.clone().add(7, 'h').toDate());
+
+            var event2start = event1start.clone().subtract(2, 'h');
+
+            var event2 = new EventCal();
+            event2.setName("toto");
+            event2.setDescription("toto");
+            event2.setStart(event2start.toDate());
+            event2.setEnd(event2start.clone().add(10, 'h').toDate());
+
+            assert.equal(ICalParsing.compare(event1, event2), 1);
+        });
+
+        it('should return -1 if the first event start before the second one', function () {
+
+            var event1start = moment("27/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var event1 = new EventCal();
+            event1.setName("toto");
+            event1.setDescription("toto");
+            event1.setStart(event1start.toDate());
+            event1.setEnd(event1start.clone().add(7, 'h').toDate());
+
+            var event2start = event1start.clone().subtract(2, 'h');
+
+            var event2 = new EventCal();
+            event2.setName("tata");
+            event2.setDescription("toto");
+            event2.setStart(event2start.toDate());
+            event2.setEnd(event2start.clone().add(10, 'h').toDate());
+
+            assert.equal(ICalParsing.compare(event2, event1), -1);
+        });
+
+        it('should return 0 if the first event start at the same as than the second one', function () {
+
+            var event1start = moment("27/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var event1 = new EventCal();
+            event1.setName("toto");
+            event1.setDescription("toto");
+            event1.setStart(event1start.toDate());
+            event1.setEnd(event1start.clone().add(7, 'h').toDate());
+
+            var event2start = event1start.clone();
+
+            var event2 = new EventCal();
+            event2.setName("tata");
+            event2.setDescription("toto");
+            event2.setStart(event2start.toDate());
+            event2.setEnd(event2start.clone().add(10, 'h').toDate());
+
+            assert.equal(ICalParsing.compare(event2, event1), 0);
+            assert.equal(ICalParsing.compare(event1, event2), 0);
+        })
+    })
 });

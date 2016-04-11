@@ -12,6 +12,23 @@
 class ICalParsing {
 
 	/**
+	 * Comparison method between two EventCal: this function should be used in Array.sort()
+	 * EventCal are compared given their startDate only.
+	 * @param event1
+	 * @param event2
+	 * @returns {number}
+     */
+	public static compare(event1 : EventCal, event2 : EventCal) {
+		if (moment(event1.getStart()).isBefore(event2.getStart())) {
+			return -1;
+		} else if (moment(event1.getStart()).isAfter(event2.getStart())) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Return all VEvents containing in an ICS
 	 *
 	 * @method getAllVEvents
@@ -38,7 +55,7 @@ class ICalParsing {
 	 * @param dateEnd The date to end the range as a JSDate. This argument is optionnal if the event has a limit of occurrences.
 	 * @returns {Array} An array of EventCal
      */
-	public static getNextVEventsOfARecurringEventInARange(reccuringVevent : any, dateStart : any, dateEnd : any = null) : Array<EventCal> {
+	public static getEventsOfARecurringEventInARange(reccuringVevent : any, dateStart : any, dateEnd : any = null) : Array<EventCal> {
 		var reccuringEvent = new ICAL.Event(reccuringVevent);
 		if (!reccuringEvent.isRecurring()) {
 			throw new Error("The passing event is not reccuring.");
@@ -90,6 +107,27 @@ class ICalParsing {
 		}
 
 		return results;
+	}
+
+	public static getEventsOfACalendarInARange(data : String, dateStart : any, dateEnd : any) : Array<EventCal> {
+		var allEvents : Array<any> = ICalParsing.getAllVEvents(data);
+
+		var result : Array<EventCal> = [];
+		for (var i = 0; i < allEvents.length; i++) {
+			var event = allEvents[i];
+			var icalEvent = new ICAL.Event(event);
+
+			if (icalEvent.isRecurring()) {
+				var recurEvents = ICalParsing.getEventsOfARecurringEventInARange(event, dateStart, dateEnd);
+			} else {
+				if (moment(dateStart).isBefore(event.startDate.toJSDate()) && moment(dateEnd).isAfter(event.endDate.toJSDate())) {
+					var eventCal = ICalParsing.createEventCalFromVEvent(event);
+					result.push(eventCal);
+				}
+			}
+		}
+
+		return result.sort(ICalParsing.compare);
 	}
 
 	public static createEventCalFromVEvent(vevent : any) : EventCal {
