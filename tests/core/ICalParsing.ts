@@ -392,7 +392,7 @@ describe('ICalParsing', function() {
             assert.throws(() => { ICalParsing.getEventsOfACalendarInARange(agendaContent, endMoment.toDate(), startMoment.toDate()) }, Error);
         });
 
-        it('should return the events of the range in the right order (scenario without recurring events)', function () {
+        it('should return the events of the range in the right order (scenario without recurring events and with all events between range)', function () {
             var startTime = moment("29/06/2016 07:00:00","DD/MM/YYYY HH:mm:ss");
             var endTime = moment("29/06/2016 15:00:00","DD/MM/YYYY HH:mm:ss");
 
@@ -419,6 +419,199 @@ describe('ICalParsing', function() {
             var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(agendaContent, startTime.toDate(), endTime.toDate());
 
             assert.deepEqual(events, expected);
-        })
+        });
+
+        it('should return the events of the range in the right order (scenario without recurring events and with some events starting before the range and some ending after and some starting and ending out of the range)', function () {
+            var startTime = moment("29/06/2016 09:20:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/06/2016 10:40:00","DD/MM/YYYY HH:mm:ss");
+
+            var event0 = new EventCal();
+            event0.setId("g5fvv131625e7olclgefbm79t0@google.com");
+            event0.setName("Remise de gueule de bois");
+            event0.setStart(moment("29/06/2016 08:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event0.setEnd(moment("29/06/2016 12:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event1 = new EventCal();
+            event1.setId("59chc311898qf0o8njm2baqqps@google.com");
+            event1.setName("Petit dej");
+            event1.setStart(moment("29/06/2016 09:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event1.setEnd(moment("29/06/2016 10:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event2 = new EventCal();
+            event2.setId("pcnorj276h9pvngd0iiclmgjn0@google.com");
+            event2.setName("Pétanque");
+            event2.setStart(moment("29/06/2016 09:30:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event2.setEnd(moment("29/06/2016 14:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var expected = [event0, event1, event2];
+
+            var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(agendaContent, startTime.toDate(), endTime.toDate());
+
+            assert.deepEqual(events, expected);
+        });
+
+        it('should return the events of the range in the right order (scenario with one occurence of a reccurring event)', function () {
+            var startTime = moment("28/06/2016 19:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/06/2016 10:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var event0 = new EventCal();
+            event0.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_1");
+            event0.setName("Apéro !");
+            event0.setStart(moment("28/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event0.setEnd(moment("28/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event1 = new EventCal();
+            event1.setId("jk59ph9kalsc9q5rn0b6gvun28@google.com");
+            event1.setName("Fiesta @Lille");
+            event1.setDescription("Soirée d'anniversaire de Jue à Lille \\o/");
+            event1.setLocation("Lille\, France");
+            event1.setStart(moment("28/06/2016 19:30:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event1.setEnd(moment("29/06/2016 03:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event2 = new EventCal();
+            event2.setId("g5fvv131625e7olclgefbm79t0@google.com");
+            event2.setName("Remise de gueule de bois");
+            event2.setStart(moment("29/06/2016 08:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event2.setEnd(moment("29/06/2016 12:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event3 = new EventCal();
+            event3.setId("59chc311898qf0o8njm2baqqps@google.com");
+            event3.setName("Petit dej");
+            event3.setStart(moment("29/06/2016 09:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event3.setEnd(moment("29/06/2016 10:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event4 = new EventCal();
+            event4.setId("pcnorj276h9pvngd0iiclmgjn0@google.com");
+            event4.setName("Pétanque");
+            event4.setStart(moment("29/06/2016 09:30:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event4.setEnd(moment("29/06/2016 14:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var expected = [event0, event1, event2, event3, event4];
+
+            var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(agendaContent, startTime.toDate(), endTime.toDate());
+            assert.equal(events.length, 5);
+            assert.deepEqual(events, expected);
+        });
+
+        it('should return the events of the range in the right order (scenario with multiple occurences of reccurring events)', function () {
+            var startTime = moment("28/06/2016 19:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("01/01/2017 10:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var event0 = new EventCal();
+            event0.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_1");
+            event0.setName("Apéro !");
+            event0.setStart(moment("28/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event0.setEnd(moment("28/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event1 = new EventCal();
+            event1.setId("jk59ph9kalsc9q5rn0b6gvun28@google.com");
+            event1.setName("Fiesta @Lille");
+            event1.setDescription("Soirée d'anniversaire de Jue à Lille \\o/");
+            event1.setLocation("Lille\, France");
+            event1.setStart(moment("28/06/2016 19:30:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event1.setEnd(moment("29/06/2016 03:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event2 = new EventCal();
+            event2.setId("g5fvv131625e7olclgefbm79t0@google.com");
+            event2.setName("Remise de gueule de bois");
+            event2.setStart(moment("29/06/2016 08:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event2.setEnd(moment("29/06/2016 12:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event3 = new EventCal();
+            event3.setId("59chc311898qf0o8njm2baqqps@google.com");
+            event3.setName("Petit dej");
+            event3.setStart(moment("29/06/2016 09:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event3.setEnd(moment("29/06/2016 10:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event4 = new EventCal();
+            event4.setId("pcnorj276h9pvngd0iiclmgjn0@google.com");
+            event4.setName("Pétanque");
+            event4.setStart(moment("29/06/2016 09:30:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event4.setEnd(moment("29/06/2016 14:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event5 = new EventCal();
+            event5.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_2");
+            event5.setName("Apéro !");
+            event5.setStart(moment("29/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event5.setEnd(moment("29/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event6 = new EventCal();
+            event6.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_3");
+            event6.setName("Apéro !");
+            event6.setStart(moment("30/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event6.setEnd(moment("30/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event7 = new EventCal();
+            event7.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_0");
+            event7.setName("Loyer");
+            event7.setStart(moment("01/07/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event7.setEnd(moment("02/07/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event8 = new EventCal();
+            event8.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_4");
+            event8.setName("Apéro !");
+            event8.setStart(moment("01/07/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event8.setEnd(moment("01/07/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event9 = new EventCal();
+            event9.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_5");
+            event9.setName("Apéro !");
+            event9.setStart(moment("02/07/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event9.setEnd(moment("02/07/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event10 = new EventCal();
+            event10.setId("g35n1rar4ncpsdbu5b2mn0hgfo@google.com_6");
+            event10.setName("Apéro !");
+            event10.setStart(moment("03/07/2016 18:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event10.setEnd(moment("03/07/2016 20:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event11 = new EventCal();
+            event11.setId("l4ml42vrjpaoloigl2fvu45q74@google.com_0");
+            event11.setName("Anniversaire Simon");
+            event11.setStart(moment("04/07/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event11.setEnd(moment("05/07/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event12 = new EventCal();
+            event12.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_1");
+            event12.setName("Loyer");
+            event12.setStart(moment("01/08/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event12.setEnd(moment("02/08/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event13 = new EventCal();
+            event13.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_2");
+            event13.setName("Loyer");
+            event13.setStart(moment("01/09/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event13.setEnd(moment("02/09/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event14 = new EventCal();
+            event14.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_3");
+            event14.setName("Loyer");
+            event14.setStart(moment("01/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event14.setEnd(moment("02/10/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event15 = new EventCal();
+            event15.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_4");
+            event15.setName("Loyer");
+            event15.setStart(moment("01/11/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event15.setEnd(moment("02/11/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event16 = new EventCal();
+            event16.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_5");
+            event16.setName("Loyer");
+            event16.setStart(moment("01/12/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event16.setEnd(moment("02/12/2016 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event17 = new EventCal();
+            event17.setId("4kniaf0minfuvqgo6fnh0b0t1s@google.com_6");
+            event17.setName("Loyer");
+            event17.setStart(moment("01/01/2017 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event17.setEnd(moment("02/01/2017 00:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var expected = [event0, event1, event2, event3, event4, event5, event6, event7, event8, event9, event10, event11, event12, event13, event14, event15, event16, event17];
+
+            var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(agendaContent, startTime.toDate(), endTime.toDate());
+            assert.equal(events.length, 18);
+            assert.deepEqual(events, expected);
+        });
     })
 });

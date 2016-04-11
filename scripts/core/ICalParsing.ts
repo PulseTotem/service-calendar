@@ -130,6 +130,10 @@ class ICalParsing {
 
 			if (icalEvent.isRecurring()) {
 				var recurEvents = ICalParsing.getEventsOfARecurringEventInARange(event, dateStart, dateEnd);
+
+				recurEvents.forEach(function (eventCal) {
+					result.push(eventCal);
+				});
 			} else {
 				var startDate = icalEvent.startDate.toJSDate();
 				var endDate = icalEvent.endDate.toJSDate();
