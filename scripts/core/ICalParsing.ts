@@ -47,7 +47,8 @@ class ICalParsing {
 	}
 
 	/**
-	 * Return all occurences of a reccurring event in the range given by two dates.
+	 * Return all occurences of a reccurring event in the range given by two dates: this method will return each events which overlaps the given time range.
+	 * Then if an event start at 8 and finish at 10, ranges 7-11, 7-9, 9-11 or 9-9:30 will all return the event.
 	 * This method throws error if the given event is not reccuring or if the recursion has not limit and no dateEnd is given.
 	 *
 	 * @param reccuringVevent An ICS event on the form of a ICAL.Component
@@ -84,22 +85,28 @@ class ICalParsing {
 			timeOccurence = recurExpansion.next();
 			if (timeOccurence != null) {
 				momentTimeOcc = moment(timeOccurence.toJSDate());
+				var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
+				var startDate =  occurenceDetails.startDate.toJSDate();
+				var endDate = occurenceDetails.endDate.toJSDate();
 
-				if (momentTimeOcc.isAfter(dateStart)) {
-					if (dateEnd == null || momentTimeOcc.isBefore(dateEnd)) {
-						var occurenceDetails = reccuringEvent.getOccurrenceDetails(timeOccurence);
+				if ((dateEnd == null && momentTimeOcc.isAfter(dateStart)) || moment(startDate).isBetween(dateStart, dateEnd) || moment(endDate).isBetween(dateStart, dateEnd) || moment(dateStart).isBetween(startDate, endDate) || moment(dateEnd).isBetween(startDate, endDate)) {
+					var uid = reccuringEvent.uid+"_"+occNumber;
+					var eventCal : EventCal = new EventCal(uid);
+					eventCal.setName(reccuringEvent.summary);
 
-						var uid = reccuringEvent.uid+"_"+occNumber;
-						var eventCal : EventCal = new EventCal(uid);
-						eventCal.setName(reccuringEvent.summary);
+					if (reccuringEvent.description) {
 						eventCal.setDescription(reccuringEvent.description);
-						eventCal.setLocation(reccuringEvent.location);
-						eventCal.setStart(occurenceDetails.startDate.toJSDate());
-						eventCal.setEnd(occurenceDetails.endDate.toJSDate());
-						results.push(eventCal);
-					} else if (dateEnd !== null && momentTimeOcc.isAfter(dateEnd)) {
-						break;
 					}
+
+					if (reccuringEvent.location) {
+						eventCal.setLocation(reccuringEvent.location);
+					}
+
+					eventCal.setStart(occurenceDetails.startDate.toJSDate());
+					eventCal.setEnd(occurenceDetails.endDate.toJSDate());
+					results.push(eventCal);
+				} else if (dateEnd !== null && momentTimeOcc.isAfter(dateEnd)) {
+					break;
 				}
 
 				occNumber++;
@@ -112,6 +119,10 @@ class ICalParsing {
 	public static getEventsOfACalendarInARange(data : String, dateStart : any, dateEnd : any) : Array<EventCal> {
 		var allEvents : Array<any> = ICalParsing.getAllVEvents(data);
 
+		if (moment(dateStart).isAfter(dateEnd)) {
+			throw new Error("The given dateStart argument is after dateEnd : "+dateStart+ " > "+dateEnd);
+		}
+
 		var result : Array<EventCal> = [];
 		for (var i = 0; i < allEvents.length; i++) {
 			var event = allEvents[i];
@@ -120,7 +131,10 @@ class ICalParsing {
 			if (icalEvent.isRecurring()) {
 				var recurEvents = ICalParsing.getEventsOfARecurringEventInARange(event, dateStart, dateEnd);
 			} else {
-				if (moment(dateStart).isBefore(event.startDate.toJSDate()) && moment(dateEnd).isAfter(event.endDate.toJSDate())) {
+				var startDate = icalEvent.startDate.toJSDate();
+				var endDate = icalEvent.endDate.toJSDate();
+
+				if (moment(startDate).isBetween(dateStart, dateEnd) || moment(endDate).isBetween(dateStart, dateEnd) || moment(dateStart).isBetween(startDate, endDate) || moment(dateEnd).isBetween(startDate, endDate)) {
 					var eventCal = ICalParsing.createEventCalFromVEvent(event);
 					result.push(eventCal);
 				}
@@ -135,11 +149,17 @@ class ICalParsing {
 
 		var eventCal : EventCal = new EventCal(event.uid);
 		eventCal.setName(event.summary);
-		eventCal.setDescription(event.description);
-		eventCal.setLocation(event.location);
+
+		if (event.description) {
+			eventCal.setDescription(event.description);
+		}
+
+		if (event.location) {
+			eventCal.setLocation(event.location);
+		}
+
 		eventCal.setStart(event.startDate.toJSDate());
 		eventCal.setEnd(event.endDate.toJSDate());
-		eventCal.setObsoleteDate(event.endDate.toJSDate());
 
 		return eventCal;
 	}

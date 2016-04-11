@@ -51,7 +51,6 @@ describe('ICalParsing', function() {
 
             expectedEvent.setStart(startDate.toDate());
             expectedEvent.setEnd(endDate.toDate());
-            expectedEvent.setObsoleteDate(endDate.toDate());
 
             var consideredVEvent = searchVeventById(idEvent);
 
@@ -248,7 +247,67 @@ describe('ICalParsing', function() {
 
             assert.throws(() => { ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate())}, Error);
         });
-    })
+
+        it('should return an occurence if the event started before the range but ended during the range', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("29/06/2016 19:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/06/2016 21:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+
+            assert.equal(icalEvents.length, 1);
+
+            var eventCal = icalEvents[0];
+
+            var expectedStartMoment = moment("29/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 18:00:00
+            var expectedEndMoment = moment("29/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 20:00:00
+
+            assert.deepEqual(eventCal.getStart(), expectedStartMoment.toDate());
+            assert.deepEqual(eventCal.getEnd(), expectedEndMoment.toDate());
+        });
+
+        it('should return an occurence if the event started during the range but ended after the range', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("29/06/2016 17:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/06/2016 19:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+
+            assert.equal(icalEvents.length, 1);
+
+            var eventCal = icalEvents[0];
+
+            var expectedStartMoment = moment("29/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 18:00:00
+            var expectedEndMoment = moment("29/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 20:00:00
+
+            assert.deepEqual(eventCal.getStart(), expectedStartMoment.toDate());
+            assert.deepEqual(eventCal.getEnd(), expectedEndMoment.toDate());
+        });
+
+        it('should return an occurence if the event started before the range and ended after the range', function () {
+            var idEvent = "g35n1rar4ncpsdbu5b2mn0hgfo@google.com"; // Apéro !
+            var recurringVevent = searchVeventById(idEvent);
+
+            var startTime = moment("29/06/2016 19:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/06/2016 19:30:00","DD/MM/YYYY HH:mm:ss");
+
+            var icalEvents : Array<EventCal> = ICalParsing.getEventsOfARecurringEventInARange(recurringVevent, startTime.toDate(), endTime.toDate());
+
+            assert.equal(icalEvents.length, 1);
+
+            var eventCal = icalEvents[0];
+
+            var expectedStartMoment = moment("29/06/2016 18:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 18:00:00
+            var expectedEndMoment = moment("29/06/2016 20:00:00","DD/MM/YYYY HH:mm:ss"); // 29/06/2016 20:00:00
+
+            assert.deepEqual(eventCal.getStart(), expectedStartMoment.toDate());
+            assert.deepEqual(eventCal.getEnd(), expectedEndMoment.toDate());
+        });
+    });
 
     describe('compare', function () {
         it('should return 1 if the first event start after the second one', function () {
@@ -313,6 +372,53 @@ describe('ICalParsing', function() {
 
             assert.equal(ICalParsing.compare(event2, event1), 0);
             assert.equal(ICalParsing.compare(event1, event2), 0);
+        })
+    });
+
+    describe('getEventsOfACalendarInARange', function () {
+        it('should return an empty array if there is no events in the given range', function () {
+            var startMoment = moment("01/02/2016 03:00:00","DD/MM/YYYY HH:mm:ss");
+            var endMoment = moment("02/02/2016 03:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var events = ICalParsing.getEventsOfACalendarInARange(agendaContent, startMoment.toDate(), endMoment.toDate());
+
+            assert.equal(events.length, 0);
+        });
+
+        it('should throw an exception if the end date of the range is before the start date', function () {
+            var startMoment = moment("01/02/2016 03:00:00","DD/MM/YYYY HH:mm:ss");
+            var endMoment = moment("02/02/2016 03:00:00","DD/MM/YYYY HH:mm:ss");
+
+            assert.throws(() => { ICalParsing.getEventsOfACalendarInARange(agendaContent, endMoment.toDate(), startMoment.toDate()) }, Error);
+        });
+
+        it('should return the events of the range in the right order (scenario without recurring events)', function () {
+            var startTime = moment("29/06/2016 07:00:00","DD/MM/YYYY HH:mm:ss");
+            var endTime = moment("29/06/2016 15:00:00","DD/MM/YYYY HH:mm:ss");
+
+            var event0 = new EventCal();
+            event0.setId("g5fvv131625e7olclgefbm79t0@google.com");
+            event0.setName("Remise de gueule de bois");
+            event0.setStart(moment("29/06/2016 08:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event0.setEnd(moment("29/06/2016 12:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event1 = new EventCal();
+            event1.setId("59chc311898qf0o8njm2baqqps@google.com");
+            event1.setName("Petit dej");
+            event1.setStart(moment("29/06/2016 09:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event1.setEnd(moment("29/06/2016 10:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var event2 = new EventCal();
+            event2.setId("pcnorj276h9pvngd0iiclmgjn0@google.com");
+            event2.setName("Pétanque");
+            event2.setStart(moment("29/06/2016 09:30:00","DD/MM/YYYY HH:mm:ss").toDate());
+            event2.setEnd(moment("29/06/2016 14:00:00","DD/MM/YYYY HH:mm:ss").toDate());
+
+            var expected = [event0, event1, event2];
+
+            var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(agendaContent, startTime.toDate(), endTime.toDate());
+
+            assert.deepEqual(events, expected);
         })
     })
 });
