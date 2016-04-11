@@ -40,27 +40,34 @@ class CurrentEvents extends SourceItf {
 			} else {
 				var startDate = moment();
 				var endDate = moment().add(10, "minutes");
-				var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, startDate.toDate(), endDate.toDate());
 
-				var eventList : EventList = new EventList(uuid.v1());
-				eventList.setName(self.getParams().Name);
+				try {
+					var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, startDate.toDate(), endDate.toDate());
+					var eventList : EventList = new EventList(uuid.v1());
+					eventList.setName(self.getParams().Name);
 
-				var limit = parseInt(self.getParams().Limit);
-				var infoDuration = parseInt(self.getParams().InfoDuration);
+					var limit = parseInt(self.getParams().Limit);
+					var infoDuration = parseInt(self.getParams().InfoDuration);
 
-				if (limit > events.length) {
-					limit = events.length;
+					if (limit > events.length) {
+						limit = events.length;
+					}
+
+					for (var i = 0; i < limit; i++) {
+						var event : EventCal = events[i];
+
+						event.setDurationToDisplay(infoDuration);
+						eventList.addEvent(event);
+					}
+
+					eventList.setDurationToDisplay(infoDuration * limit);
+					self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
+				} catch (err) {
+					Logger.error("Error while getting events from ICS with following range: "+startDate+" -> "+endDate);
+					Logger.error(err);
 				}
 
-				for (var i = 0; i < limit; i++) {
-					var event : EventCal = events[i];
 
-					event.setDurationToDisplay(infoDuration);
-					eventList.addEvent(event);
-				}
-
-				eventList.setDurationToDisplay(infoDuration * limit);
-				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
 			}
 		});

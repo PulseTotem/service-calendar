@@ -52,21 +52,27 @@ class EventsForNextYHours extends SourceItf {
 				var now : any = moment();
 				var futureNow : any = moment().add(timeWindow, "hours");
 
-				var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, now, futureNow);
+				try {
+					var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, now, futureNow);
 
-				if (limit > events.length) {
-					limit = events.length;
+					if (limit > events.length) {
+						limit = events.length;
+					}
+
+					for (var i = 0; i < limit; i++) {
+						var event : EventCal = events[i];
+
+						event.setDurationToDisplay(infoDuration);
+						eventList.addEvent(event);
+					}
+
+					eventList.setDurationToDisplay(infoDuration * limit);
+					self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
+				} catch (err) {
+					Logger.error("Error while getting events from ICS with following range: "+now+" -> "+futureNow);
+					Logger.error(err);
 				}
 
-				for (var i = 0; i < limit; i++) {
-					var event : EventCal = events[i];
-
-					event.setDurationToDisplay(infoDuration);
-					eventList.addEvent(event);
-				}
-
-				eventList.setDurationToDisplay(infoDuration * limit);
-				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
 			}
 		});
