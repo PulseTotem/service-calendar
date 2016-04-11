@@ -14,9 +14,9 @@ class ICalParsing {
 	/**
 	 * Comparison method between two EventCal: this function should be used in Array.sort()
 	 * EventCal are compared given their startDate only.
-	 * @param event1
-	 * @param event2
-	 * @returns {number}
+	 * @param event1 An EventCal
+	 * @param event2 Another EventCal
+	 * @returns {number} 1 if event1 started after event2; -1 if event2 started after event1 and 0 if they started at the exact same time.
      */
 	public static compare(event1 : EventCal, event2 : EventCal) {
 		if (moment(event1.getStart()).isBefore(event2.getStart())) {
@@ -33,7 +33,7 @@ class ICalParsing {
 	 *
 	 * @method getAllVEvents
 	 * @param data Data containing in an ICS
-	 * @returns {Array} The Array of VEvents
+	 * @returns {ICAL.Component[]} An of ICAL.Component (see http://mozilla-comm.github.io/ical.js/api/ICAL.Component.html)
 	 */
 	public static getAllVEvents(data : String) : Array<any> {
 		var jCalData = ICAL.parse(data);
@@ -54,7 +54,7 @@ class ICalParsing {
 	 * @param reccuringVevent An ICS event on the form of a ICAL.Component
 	 * @param dateStart The date to start the range as a JSDate
 	 * @param dateEnd The date to end the range as a JSDate. This argument is optionnal if the event has a limit of occurrences.
-	 * @returns {Array} An array of EventCal
+	 * @returns {EventCal[]} An array of EventCal
      */
 	public static getEventsOfARecurringEventInARange(reccuringVevent : any, dateStart : any, dateEnd : any = null) : Array<EventCal> {
 		var reccuringEvent = new ICAL.Event(reccuringVevent);
@@ -116,6 +116,15 @@ class ICalParsing {
 		return results;
 	}
 
+	/**
+	 * Retrieve all events of an ICS containing in the date range given by dateStart and dateEnd.
+	 * As for (@see getEventsOfARecurringEventInARange) this method retrieves all events which overlaps the date range:
+	 * if an event start at 8 and finish at 10, ranges 7-11, 7-9, 9-11 or 9-9:30 will all return the event.
+	 * @param data A string representing an ICS
+	 * @param dateStart the date (dateJS) to start the date range
+	 * @param dateEnd the date (dateJS) to end the date range
+	 * @returns {EventCal[]} An array of EventCal
+     */
 	public static getEventsOfACalendarInARange(data : String, dateStart : any, dateEnd : any) : Array<EventCal> {
 		var allEvents : Array<any> = ICalParsing.getAllVEvents(data);
 
@@ -168,19 +177,4 @@ class ICalParsing {
 		return eventCal;
 	}
 
-	public static getStartDateFromVEvent(vevent : any) : any {
-		var event : any = new ICAL.Event(vevent);
-
-		var startDate = event.startDate.toJSDate();
-
-		return moment(startDate);
-	}
-
-	public static getEndDateFromVEvent(vevent : any) : any {
-		var event : any = new ICAL.Event(vevent);
-
-		var endDate = event.endDate.toJSDate();
-
-		return moment(endDate);
-	}
 }

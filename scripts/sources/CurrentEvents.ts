@@ -22,9 +22,6 @@ class CurrentEvents extends SourceItf {
 	constructor(params : any, calendarNamespaceManager : CalendarNamespaceManager) {
 		super(params, calendarNamespaceManager);
 
-		Logger.debug("Call next events with params :");
-		Logger.debug(params);
-
 		if (this.checkParams(["Limit", "InfoDuration", "URL", "Name"])) {
 			this.run();
 		}
@@ -41,37 +38,28 @@ class CurrentEvents extends SourceItf {
 				Logger.error("Status Code: "+response.statusCode);
 				Logger.error("Body: "+body);
 			} else {
-				var vevents = ICalParsing.getAllVEvents(body);
+				var startDate = moment();
+				var endDate = moment().add(10, "minutes");
+				var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, startDate.toDate(), endDate.toDate());
 
 				var eventList : EventList = new EventList(uuid.v1());
 				eventList.setName(self.getParams().Name);
 
-				var retrievedEvents = 0;
 				var limit = parseInt(self.getParams().Limit);
 				var infoDuration = parseInt(self.getParams().InfoDuration);
-				var limitNotReached = true;
 
-				for (var i = 0; i < vevents.length && limitNotReached; i++) {
-					var currentEvent = vevents[i];
-
-					var endDate : any = ICalParsing.getEndDateFromVEvent(currentEvent);
-					var startDate : any = ICalParsing.getStartDateFromVEvent(currentEvent);
-					var now : any = moment();
-
-					if (now.isBefore(endDate) && now.isAfter(startDate)) {
-						var eventCal = ICalParsing.createEventCalFromVEvent(currentEvent);
-						eventCal.setDurationToDisplay(infoDuration);
-						eventList.addEvent(eventCal);
-
-						retrievedEvents++;
-
-						if (retrievedEvents == limit) {
-							limitNotReached = false;
-						}
-					}
+				if (limit > events.length) {
+					limit = events.length;
 				}
 
-				eventList.setDurationToDisplay(infoDuration * retrievedEvents);
+				for (var i = 0; i < limit; i++) {
+					var event : EventCal = events[i];
+
+					event.setDurationToDisplay(infoDuration);
+					eventList.addEvent(event);
+				}
+
+				eventList.setDurationToDisplay(infoDuration * limit);
 				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
 			}

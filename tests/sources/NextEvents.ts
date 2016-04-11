@@ -25,7 +25,7 @@ describe('NextEvent', function() {
 			var mockAlbum = sandbox.mock(NextEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { URL: 'Toto', InfoDuration: '10', Name: 'bidule'};
+			var params = { URL: 'Toto', InfoDuration: '10', Name: 'bidule', EndDate: '1460384994160'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new NextEvents(params, stubNSManager);
@@ -36,7 +36,7 @@ describe('NextEvent', function() {
 			var mockAlbum = sandbox.mock(NextEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { Limit: '12', InfoDuration: '10', Name: 'bidule'};
+			var params = { Limit: '12', InfoDuration: '10', Name: 'bidule', EndDate: '1460384994160'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new NextEvents(params, stubNSManager);
@@ -47,7 +47,7 @@ describe('NextEvent', function() {
 			var mockAlbum = sandbox.mock(NextEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { URL: 'Toto', Limit: '10', Name: 'bidule'};
+			var params = { URL: 'Toto', Limit: '10', Name: 'bidule', EndDate: '1460384994160'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new NextEvents(params, stubNSManager);
@@ -58,7 +58,18 @@ describe('NextEvent', function() {
 			var mockAlbum = sandbox.mock(NextEvents.prototype);
 			mockAlbum.expects('run').never();
 
-			var params = { URL: 'Toto', Limit: '10', InfoDuration: '12'};
+			var params = { URL: 'Toto', Limit: '10', InfoDuration: '12', EndDate: '1460384994160'};
+
+			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
+			new NextEvents(params, stubNSManager);
+			mockAlbum.verify();
+		});
+
+		it('should not launch run if the parameter EndDate is missing', function () {
+			var mockAlbum = sandbox.mock(NextEvents.prototype);
+			mockAlbum.expects('run').never();
+
+			var params = { URL: 'Toto', Limit: '10', InfoDuration: '12', Name: 'bidule'};
 
 			var stubNSManager : any = sinon.createStubInstance(CalendarNamespaceManager);
 			new NextEvents(params, stubNSManager);

@@ -13,21 +13,23 @@ var request : any = require("request");
 var moment : any = require("moment");
 
 /**
- * Define a source which retrieves Y events of a calendar which are coming in the following X hours.
+ * Define a source which retrieves the event of a calendar which are coming until the limit is full.
  * This source takes those following parameters :
  *     - URL (string) : the URL of the iCalendar to parse (ICAL format)
- *     - Limit (integer) : the maximum number of events to retrieve (0 = no limit)
+ *     - Limit (integer) : the number of events to retrieve
  *     - InfoDuration (integer) : the duration of each information
  *     - Name (string) : Describe the current calendar
+ *     - StartDate (date) : Describe the date to start range
+ *     - EndDate (date) : Describe the date maximum to pick datas
  *
- * @class NextEvents
+ * @class EventsInDateRange
  */
-class EventsForNextYHours extends SourceItf {
+class EventsInDateRange extends SourceItf {
 
 	constructor(params : any, calendarNamespaceManager : CalendarNamespaceManager) {
 		super(params, calendarNamespaceManager);
 
-		if (this.checkParams(["Limit", "InfoDuration", "URL", "TimeWindow", "Name"])) {
+		if (this.checkParams(["Limit", "InfoDuration", "URL", "Name", "StartDate", "EndDate"])) {
 			this.run();
 		}
 	}
@@ -48,11 +50,11 @@ class EventsForNextYHours extends SourceItf {
 
 				var limit = parseInt(self.getParams().Limit);
 				var infoDuration = parseInt(self.getParams().InfoDuration);
-				var timeWindow = parseInt(self.getParams().TimeWindow);
-				var now : any = moment();
-				var futureNow : any = moment().add(timeWindow, "hours");
 
-				var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, now, futureNow);
+				var dateStart = moment(parseInt(self.getParams().StartDate));
+				var dateEnd = moment(parseInt(self.getParams().EndDate));
+
+				var events : Array<EventCal> = ICalParsing.getEventsOfACalendarInARange(body, dateStart.toDate(), dateEnd.toDate());
 
 				if (limit > events.length) {
 					limit = events.length;
@@ -60,11 +62,10 @@ class EventsForNextYHours extends SourceItf {
 
 				for (var i = 0; i < limit; i++) {
 					var event : EventCal = events[i];
-
 					event.setDurationToDisplay(infoDuration);
+
 					eventList.addEvent(event);
 				}
-
 				eventList.setDurationToDisplay(infoDuration * limit);
 				self.getSourceNamespaceManager().sendNewInfoToClient(eventList);
 
