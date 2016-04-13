@@ -6,6 +6,7 @@
 /// <reference path="./sources/NextEvents.ts" />
 /// <reference path="./sources/CurrentEvents.ts" />
 /// <reference path="./sources/EventsForNextYHours.ts" />
+/// <reference path="./sources/EventsInDateRange.ts" />
 
 class CalendarNamespaceManager extends SourceNamespaceManager {
 
@@ -21,5 +22,7 @@ class CalendarNamespaceManager extends SourceNamespaceManager {
 		this.addListenerToSocket("NextEvents", function (params, calendarNamespaceManager) { new NextEvents(params, calendarNamespaceManager); });
 		this.addListenerToSocket("CurrentEvents", function (params, calendarNamespaceManager) { new CurrentEvents(params, calendarNamespaceManager); });
 		this.addListenerToSocket("EventsForNextYHours", function (params, calendarNamespaceManager) { new EventsForNextYHours(params, calendarNamespaceManager); });
+		this.addListenerToSocket("EventsInDateRange", function (params, calendarNamespaceManager) { new EventsInDateRange(params, calendarNamespaceManager); });
+
 	}
 }
