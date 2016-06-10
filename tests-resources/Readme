@@ -1,0 +1,12 @@
+Définition d'un agenda de test pour tester le service.
+Toutes les dates indiquées ici sont dans l'année 2016.
+L'agenda est lié à un fuseau horaire français.
+
+Evénements de l'agenda :
+   - le 4 Juillet, réccurrence tous les ans sans arrêt, toute la journée : Anniversaire Simon
+   - le 1 de chaque mois, s'arrête après 12 répétition (début 01/07) : Loyer
+   - le 28 Juin, de 19h 30 à 3h : Fiesta, location : Lille
+   - à partir du 27 juin, tous les jours de 18h à 20h pendant une semaine : Apéro!
+   - le 29 juin de 8h à 12h : gueule de bois
+   - le 29 juin de 9h à 10h : petit déj
+   - le 29 juin de 9h 30 à 14h : pétanque
